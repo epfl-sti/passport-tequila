@@ -5,6 +5,10 @@
     "express": "2.x.x",
     "ejs": ">= 0.0.0",
     "passport": ">= 0.0.0",
-    "passport-tequila": ">= 0.1.0"
+    "passport-tequila": ">= 0.1.0",
+    "passport-strategy": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node ./app.js"
   }
 }
