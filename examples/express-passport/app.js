@@ -1,7 +1,12 @@
 var express = require('express')
+    , morgan = require('morgan')
+    , cookieParser = require('cookie-parser')
+    , bodyParser = require('body-parser')
+    , methodOverride = require('method-override')
+    , expressSession = require('express-session')
     , passport = require('passport')
     , util = require('util')
-    , TequilaStrategy = require('passport-tequila').Strategy;
+    , TequilaStrategy = require('../../lib/passport-tequila').Strategy;
 
 // Wiring up Passport session management.
 // To support persistent login sessions, Passport needs to be able to
@@ -49,23 +54,23 @@ var tequila = new TequilaStrategy({
 }, myVerify);
 passport.use(tequila);
 
-var app = express.createServer();
+var app = express();
 // configure Express
-app.configure(function() {
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'ejs');
-    app.use(express.logger());
-    app.use(express.cookieParser());
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(express.session({ secret: 'keyboard cat' }));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(morgan("dev"));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(methodOverride());
+app.use(expressSession({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false
+}));
 // Initialize Passport! Also use passport.session() middleware, to support
 // persistent login sessions (recommended).
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.use(app.router);
-    app.use(express.static(__dirname + '/public'));
-});
+app.use(passport.initialize());
+app.use(passport.session());
 app.get('/', function(req, res){
     res.render('index', { user: req.user });
 });
@@ -84,5 +89,6 @@ app.get('/logout', function(req, res){
 // Alternatively, we can also log out from Tequila altogether.
 app.get('/globallogout', tequila.globalLogout("/"));
 
-app.listen(process.env.PORT || 3000);
-console.log('Demo server listening on port ' + app.address().port);
+var portNumber = process.env.PORT || 3000;
+app.listen(portNumber);
+console.log('Demo server listening on port ' + portNumber);
