@@ -11,13 +11,19 @@
     "passport-strategy": "^1.0.0"
   },
   "devDependencies": {
-    "express": "^4.13.3",
-    "morgan": "^1.6.1",
+    "body-parser": "^1.15.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.2.0",
     "cookie-parser": "^1.4.0",
-    "body-parser": "^1.14.1",
-    "method-override": "^2.3.5",
+    "ejs": "^2.3.4",
+    "express": "^4.13.3",
     "express-session": "^1.11.3",
-    "ejs": "^2.3.4"
+    "method-override": "^2.3.5",
+    "mocha": "^2.4.5",
+    "mocha-as-promised": "^2.0.0",
+    "morgan": "^1.6.1",
+    "multiline": "^1.0.2",
+    "underscore": "^1.8.3"
   },
   "main": "./lib/passport-tequila",
   "author": {
