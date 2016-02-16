@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+/**
+ * Stand-alone fake Tequila server
+ */
+
+var FakeTequilaServer = require("../fakes").TequilaServer,
+    server = new FakeTequilaServer();
+
+server.port = process.env.FAKE_TEQUILA_PORT || 3010;
+server.start(function (err) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log("Fake Tequila server listening on port " + server.port);
+    }
+});

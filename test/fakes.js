@@ -8,6 +8,10 @@ var https = require("https"),
 'use strict';
 
 /**
+ * A fake Tequila server.
+ *
+ * @property port The port number to listen to. Must be set no later than
+ *   .start() time, otherwise a port number is selected.
  * @constructor
  */
 var TequilaServer = exports.TequilaServer = function() {
