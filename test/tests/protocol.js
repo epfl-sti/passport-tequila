@@ -5,7 +5,6 @@ var assert = require('assert'),
     Q = require('Q'),
     _ = require('underscore');
 
-require('mocha-as-promised')();
 chai.use(chaiAsPromised);
 chai.should();
 
