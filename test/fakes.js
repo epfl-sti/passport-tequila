@@ -108,43 +108,40 @@ var Response = exports.Response = function() {
 //   openssl req -x509 -nodes -days 3650 -newkey rsa:1024 \
 //        -keyout /dev/stdout -batch -subj "/O=test/CN=localhost"
 //
-// No leading whitespace allowed - Be careful not to reindent!
 
-var fakeCert = exports.certificate = multiline(function() { /*
------BEGIN CERTIFICATE-----
-MIICFDCCAX2gAwIBAgIJAPk4T3QL6eNUMA0GCSqGSIb3DQEBCwUAMCMxDTALBgNV
-BAoMBHRlc3QxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0xNjAyMTUxNTMyNThaFw0y
-NjAyMTIxNTMyNThaMCMxDTALBgNVBAoMBHRlc3QxEjAQBgNVBAMMCWxvY2FsaG9z
-dDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAtiDnFgt2H+larAOAwQ8drzyc
-mAtbsHkyhEXE28anaZeyACb1MDxpzh4cG+Hy0yggiekORFPmjGsY3weGVTnANJK6
-6FhqrQjrejl1oh0milv550tV+pFyyQ2a8gagbF3efKU1YixBA9nqyWA9uWHj2nLL
-nfd9aKPS7iOqedQZ6UECAwEAAaNQME4wHQYDVR0OBBYEFGdKsgCwRxFBYl068ADv
-UMYPCVsLMB8GA1UdIwQYMBaAFGdKsgCwRxFBYl068ADvUMYPCVsLMAwGA1UdEwQF
-MAMBAf8wDQYJKoZIhvcNAQELBQADgYEAD4ExR63rqegQQ8tWoBjP2ytk+pU9Zfwr
-QpyxGctrbjH8UmU0F9grTpXpmk8lEirb60pvzCyCy9fvjqYjaw72PgKnD/QvG8Xo
-7GJPF2N1gVfSnlGvFTq6QyPXq8fM6kZkCfFj2FbSTDtfzauWCZdGzi84JRB3Oxs7
-KQiZrnTMFcg=
------END CERTIFICATE-----
-*/});
+var fakeCert = exports.certificate =
+    "-----BEGIN CERTIFICATE-----\n" +
+    "MIICFDCCAX2gAwIBAgIJAPk4T3QL6eNUMA0GCSqGSIb3DQEBCwUAMCMxDTALBgNV\n" +
+    "BAoMBHRlc3QxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0xNjAyMTUxNTMyNThaFw0y\n" +
+    "NjAyMTIxNTMyNThaMCMxDTALBgNVBAoMBHRlc3QxEjAQBgNVBAMMCWxvY2FsaG9z\n" +
+    "dDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAtiDnFgt2H+larAOAwQ8drzyc\n" +
+    "mAtbsHkyhEXE28anaZeyACb1MDxpzh4cG+Hy0yggiekORFPmjGsY3weGVTnANJK6\n" +
+    "6FhqrQjrejl1oh0milv550tV+pFyyQ2a8gagbF3efKU1YixBA9nqyWA9uWHj2nLL\n" +
+    "nfd9aKPS7iOqedQZ6UECAwEAAaNQME4wHQYDVR0OBBYEFGdKsgCwRxFBYl068ADv\n" +
+    "UMYPCVsLMB8GA1UdIwQYMBaAFGdKsgCwRxFBYl068ADvUMYPCVsLMAwGA1UdEwQF\n" +
+    "MAMBAf8wDQYJKoZIhvcNAQELBQADgYEAD4ExR63rqegQQ8tWoBjP2ytk+pU9Zfwr\n" +
+    "QpyxGctrbjH8UmU0F9grTpXpmk8lEirb60pvzCyCy9fvjqYjaw72PgKnD/QvG8Xo\n" +
+    "7GJPF2N1gVfSnlGvFTq6QyPXq8fM6kZkCfFj2FbSTDtfzauWCZdGzi84JRB3Oxs7\n" +
+    "KQiZrnTMFcg=\n" +
+    "-----END CERTIFICATE-----\n";
 
-var fakeKey = multiline(function() { /*
------BEGIN PRIVATE KEY-----
-MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALYg5xYLdh/pWqwD
-gMEPHa88nJgLW7B5MoRFxNvGp2mXsgAm9TA8ac4eHBvh8tMoIInpDkRT5oxrGN8H
-hlU5wDSSuuhYaq0I63o5daIdJopb+edLVfqRcskNmvIGoGxd3nylNWIsQQPZ6slg
-Pblh49pyy533fWij0u4jqnnUGelBAgMBAAECgYAhHhiHJKxlHxyyvKxT7ri6Ha5n
-42DX1SH/dWRXhmb4x3HBn1PkYofmyAjadRqflONd0Hgcqpj4nZzXKVoe8zJkzeCZ
-ydivuH3pL/n/nQryvX3XHYcYXRUccoq/cDmHOEV6nBLElVryqXYJMBZdFMWYYevE
-Oqeaim1p4M0od8Z/AQJBAPJQrrwTccBNuwcDbCQfRd5yqVY0AWbL12zOR+9Cfrws
-9D3lthbH9ZRuTxAs0WL7RH26gXBBf5BDxmoEsw9nO1ECQQDAag90HcxY4svwMSEi
-aXdOnuxs/03HsjtiC+3YiHPw3F7Nfhockmzu9qyp6b23ZvXn6q1ULNNxhadSuhex
-MXLxAkEAyIUd5AOPOVzZrXcWkVnTvr5SBUTp+AAtWBvoCUWUjPICeApUwctdHSSf
-hrof1/IofobNQHDjOCXt1qPm7ZM20QJAOydgIN6YWCtBb1JrUV0DJNSO8uN6Ug5l
-Wzs3n/4zRrU5IAvIk0gg3UZQxtvpS10H9IidSOePCbOBQVmctwjwwQJBAPGYg4PL
-Y3Bs0u9IVS6HhVLCTdorgcxDs03czDK819UZmZb7O8jdc5QlJBniLBR/lrHV3IbJ
-y4S/YbSQ7jvaGxU=
------END PRIVATE KEY-----
-*/});
+var fakeKey =
+    "-----BEGIN PRIVATE KEY-----\n" +
+    "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALYg5xYLdh/pWqwD\n" +
+    "gMEPHa88nJgLW7B5MoRFxNvGp2mXsgAm9TA8ac4eHBvh8tMoIInpDkRT5oxrGN8H\n" +
+    "hlU5wDSSuuhYaq0I63o5daIdJopb+edLVfqRcskNmvIGoGxd3nylNWIsQQPZ6slg\n" +
+    "Pblh49pyy533fWij0u4jqnnUGelBAgMBAAECgYAhHhiHJKxlHxyyvKxT7ri6Ha5n\n" +
+    "42DX1SH/dWRXhmb4x3HBn1PkYofmyAjadRqflONd0Hgcqpj4nZzXKVoe8zJkzeCZ\n" +
+    "ydivuH3pL/n/nQryvX3XHYcYXRUccoq/cDmHOEV6nBLElVryqXYJMBZdFMWYYevE\n" +
+    "Oqeaim1p4M0od8Z/AQJBAPJQrrwTccBNuwcDbCQfRd5yqVY0AWbL12zOR+9Cfrws\n" +
+    "9D3lthbH9ZRuTxAs0WL7RH26gXBBf5BDxmoEsw9nO1ECQQDAag90HcxY4svwMSEi\n" +
+    "aXdOnuxs/03HsjtiC+3YiHPw3F7Nfhockmzu9qyp6b23ZvXn6q1ULNNxhadSuhex\n" +
+    "MXLxAkEAyIUd5AOPOVzZrXcWkVnTvr5SBUTp+AAtWBvoCUWUjPICeApUwctdHSSf\n" +
+    "hrof1/IofobNQHDjOCXt1qPm7ZM20QJAOydgIN6YWCtBb1JrUV0DJNSO8uN6Ug5l\n" +
+    "Wzs3n/4zRrU5IAvIk0gg3UZQxtvpS10H9IidSOePCbOBQVmctwjwwQJBAPGYg4PL\n" +
+    "Y3Bs0u9IVS6HhVLCTdorgcxDs03czDK819UZmZb7O8jdc5QlJBniLBR/lrHV3IbJ\n" +
+    "y4S/YbSQ7jvaGxU=\n" +
+    "-----END PRIVATE KEY-----\n";
 
 /**
  * A fake HTTP/S server.
@@ -180,5 +177,5 @@ exports.request.get = function(uri, options, callback) {
   var params = request.initParams(uri, options, callback);
   params.method = "get";
   return requestWithFakeCert(params);
-}
+};
 

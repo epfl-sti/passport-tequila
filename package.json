@@ -21,7 +21,6 @@
     "method-override": "^2.3.5",
     "mocha": "^2.4.5",
     "morgan": "^1.6.1",
-    "multiline": "^1.0.2",
     "underscore": "^1.8.3"
   },
   "main": "./lib/passport-tequila",
