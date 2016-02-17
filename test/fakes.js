@@ -1,11 +1,21 @@
-var https = require("https"),
-    express = require("express"),
-    bodyParser = require("body-parser"),
-    request = require("request"),
-    Protocol = require("../lib/passport-tequila/protocol"),
-    multiline = require("multiline");
-
 'use strict';
+
+function weakRequire(modulePath) {
+    try {
+        return require(modulePath);
+    } catch (e) {
+        return undefined;
+    }
+}
+
+// Note: because getOptions() is useful also for an out-of-process server,
+// this file ought to remain useful (loadable) even if the dev dependencies
+// are not available.
+var https = require("https"),
+    express = weakRequire("express"),
+    bodyParser = weakRequire("body-parser"),
+    request = weakRequire("request"),
+    Protocol = require("../lib/passport-tequila/protocol");
 
 /**
  * A fake Tequila server.
