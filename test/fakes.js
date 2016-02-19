@@ -114,8 +114,8 @@ TequilaServer.prototype.do_requestauth = function(req, res, next) {
             "<form action='/requestauth_submit' method='GET'>\n" +
             "<input type='hidden' id='requestkey' name='requestkey' " +
             "       value='" + req.query.requestkey + "'>\n" +
-            "<label for='sciper'>SCIPER:</label>" +
-            "<input type='text' id='sciper' name='sciper' value='243371'><br/>\n" +
+            "<label for='uniqueid'>SCIPER:</label>" +
+            "<input type='text' id='uniqueid' name='uniqueid' value='243371'><br/>\n" +
             "<label for='displayname'>Display name:</label>" +
             "<input type='text' id='displayname' name='displayname' value='Dominique Quatravaux'><br/>\n" +
             "<input type='submit'>\n" +
@@ -127,7 +127,7 @@ TequilaServer.prototype.do_requestauth_submit = function(req, res, next) {
     this.state[responseKey] = {
         status: "ok",
         requestkey: req.query.requestkey,
-        sciper: req.query.sciper,
+        uniqueid: req.query.uniqueid,
         displayname: req.query.displayname
     };
     res.redirect("http://localhost:3000/?key=" + responseKey);
