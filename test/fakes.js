@@ -17,6 +17,23 @@ var https = require("https"),
     request = weakRequire("request"),
     Protocol = require("../lib/passport-tequila/protocol");
 
+var txt2dictBodyParser = function () {
+    var textParser = bodyParser.text();
+    return function(req, res, next) {
+        if (req.method === "POST" && ! req.headers['content-type']) {
+            // Real Tequila server doesn't seem to care about the content type
+            req.headers['content-type'] = "text/plain";
+        }
+        return textParser(req, res, function (error) {
+            if (error) return next(error);
+            if (typeof req.body === 'string') {
+                req.teqParams = Protocol.txt2dict(req.body);
+            }
+            return next();
+        });
+    }
+};
+
 /**
  * A fake Tequila server.
  *
@@ -25,28 +42,16 @@ var https = require("https"),
  * @constructor
  */
 var TequilaServer = exports.TequilaServer = function() {
-    this.createdRequests = {};
+    this.state = {};
     var app = this.app = express();
-    var parser = bodyParser.text();
-    app.use(function(req, res, next) {
-        if (req.method === "POST" && ! req.headers['content-type']) {
-            // Real Tequila server doesn't seem to care about the content type
-            req.headers['content-type'] = "text/plain";
-        }
-        return parser(req, res, next);
-    });
-
-    var protocol = new Protocol();
-    app.post(protocol.tequila_createrequest_path,
-        this.do_createrequest.bind(this));
-    app.get(protocol.tequila_fetchattributes_path,
-        this.do_fetchattributes.bind(this));
+    app.use(txt2dictBodyParser());
+    addUrlMap(app, this);
 };
 
 TequilaServer.prototype.start = function(done) {
     var self = this;
     var server = HTTPSServer(self.app);
-    server.listen(0, function(error) {
+    server.listen(self.port || 0, function(error) {
         if (error) {
             done(error);
         } else {
@@ -56,24 +61,17 @@ TequilaServer.prototype.start = function(done) {
     });
 };
 
-TequilaServer.prototype.do_createrequest = function(req, res, next) {
-    var key = this.newKey();
-    this.createdRequests[key] = Protocol.txt2dict(req.body);
-    res.set("Content-Type", "text/plain; charset=UTF-8\n").send(new Buffer("key=" + key + "\n"));
-};
+function respondWithDict(res, dict) {
+    res.set("Content-Type", "text/plain; charset=UTF-8\n").send(new Buffer(
+        Protocol.dict2txt(dict)));
+}
 
 TequilaServer.prototype.newKey = function() {
-    var key = 12345;
-    while(String(key) in this.createdRequests) {
-        key = key + 1;
-    }
+    var key = 12344;
+    while(String(++key) in this.state) {}
     return String(key);
 };
 
-
-TequilaServer.prototype.do_fetchattributes = function(req, res) {
-    res.send('Hello World!');
-};
 
 TequilaServer.prototype.getOptions = function() {
     if (! this.port) {
@@ -84,6 +82,59 @@ TequilaServer.prototype.getOptions = function() {
         tequila_port: this.port,
         agent: new https.Agent({ca: fakeCert})
     }
+};
+
+/************************ Serving *******************************/
+
+function addUrlMap(app, that) {
+    var protocol = new Protocol();
+    app.get(protocol.tequila_requestauth_path,
+        that.do_requestauth.bind(that));
+    app.get("/requestauth_submit",
+        that.do_requestauth_submit.bind(that));
+    app.post(protocol.tequila_createrequest_path,
+        that.do_createrequest.bind(that));
+    app.post(protocol.tequila_fetchattributes_path,
+        that.do_fetchattributes.bind(that));
+}
+
+TequilaServer.prototype.do_createrequest = function(req, res, next) {
+    var key = this.newKey();
+    this.state[key] = req.teqParams;
+    respondWithDict(res, {key: key});
+};
+
+TequilaServer.prototype.do_requestauth = function(req, res, next) {
+    res.send("<html>\n" +
+            "<head>\n" +
+            "<title>Fake Tequila Server</title></head>\n" +
+            "<body>\n" +
+            "<h1>Fake Tequila Server</h1>" +
+            "<p>Whom would you like to impersonate today?</p>" +
+            "<form action='/requestauth_submit' method='GET'>\n" +
+            "<input type='hidden' id='requestkey' name='requestkey' " +
+            "       value='" + req.query.requestkey + "'>\n" +
+            "<label for='sciper'>SCIPER:</label>" +
+            "<input type='text' id='sciper' name='sciper' value='243371'><br/>\n" +
+            "<label for='displayname'>Display name:</label>" +
+            "<input type='text' id='displayname' name='displayname' value='Dominique Quatravaux'><br/>\n" +
+            "<input type='submit'>\n" +
+            "</form></body></html>\n");
+};
+
+TequilaServer.prototype.do_requestauth_submit = function(req, res, next) {
+    var responseKey = this.newKey();
+    this.state[responseKey] = {
+        status: "ok",
+        requestkey: req.query.requestkey,
+        sciper: req.query.sciper,
+        displayname: req.query.displayname
+    };
+    res.redirect("http://localhost:3000/?key=" + responseKey);
+};
+
+TequilaServer.prototype.do_fetchattributes = function(req, res, next) {
+    respondWithDict(res, this.state[req.teqParams.key]);
 };
 
 /**

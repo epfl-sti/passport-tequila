@@ -40,7 +40,7 @@ describe("fakes.TequilaServer", function () {
                 require: "group=somegroup",
                 allows: "category=guest"
             };
-            expect(server.createdRequests).to.deep.equal(
+            expect(server.state).to.deep.equal(
                 _.object([[key, expectedRequest]]));
         }).should.notify(done);
     });
