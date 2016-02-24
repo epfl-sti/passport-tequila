@@ -130,7 +130,8 @@ TequilaServer.prototype.do_requestauth_submit = function(req, res, next) {
         uniqueid: req.query.uniqueid,
         displayname: req.query.displayname
     };
-    res.redirect("http://localhost:3000/?key=" + responseKey);
+    var urlaccess = this.state[req.query.requestkey].urlaccess;
+    res.redirect(urlaccess + "?key=" + responseKey);
 };
 
 TequilaServer.prototype.do_fetchattributes = function(req, res, next) {
