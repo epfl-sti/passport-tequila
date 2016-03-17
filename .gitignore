@@ -1,6 +1,7 @@
 node_modules
 .DS_store
 .idea
+.vscode
 npm-debug.log
 .emacs.desktop*
 

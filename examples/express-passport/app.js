@@ -30,19 +30,18 @@ passport.deserializeUser(function(obj, done) {
  * fetch a user record object from your database (using the Tequila user profile.user),
  * and call done(null, obj) with that object instead.
 
- * @param accessToken
- * @param refreshToken
- * @param profile
- * @param {function} done Called as done(e) in case of error, and done(null, userObj) in case of success
+ * @param req
+ * @param res
+ * @param {function} done Called as done(error, req, res) in case of error, and done(null, req, res) in case of success
  */
 // Strategies in Passport require a `verify` function, which accept
 // credentials (in this case, an accessToken, refreshToken, and Tequila
 // profile), and invoke a callback with a user object.
-function myVerify(accessToken, refreshToken, profile, done) {
+function myVerify(req, res, done) {
     // Pretend the verification is asynchronous (as would be required
     // e.g. if using a database):
     process.nextTick(function () {
-        done(null, profile);
+        done(null, req, res);
     });
 }
 
