@@ -22,36 +22,12 @@ passport.deserializeUser(function(obj, done) {
     done(null, obj);
 });
 
-/**
- * The Passport `verify' function, to be provided by the application.
- *
- * To keep the example simple, the user's Tequila session data is returned to
- * represent the logged-in user. In a more sophisticated application, you could
- * fetch a user record object from your database (using the Tequila user profile.user),
- * and call done(null, obj) with that object instead.
-
- * @param accessToken
- * @param refreshToken
- * @param profile
- * @param {function} done Called as done(e) in case of error, and done(null, userObj) in case of success
- */
-// Strategies in Passport require a `verify` function, which accept
-// credentials (in this case, an accessToken, refreshToken, and Tequila
-// profile), and invoke a callback with a user object.
-function myVerify(accessToken, refreshToken, profile, done) {
-    // Pretend the verification is asynchronous (as would be required
-    // e.g. if using a database):
-    process.nextTick(function () {
-        done(null, profile);
-    });
-}
-
 // Use the TequilaStrategy within Passport.
 var tequila = new TequilaStrategy({
     service: "Demo Tequila App in node.js",
     request: ["displayname"],
     // require: "group=openstack-sti",  // Uncomment and use a group you are a member of.
-}, myVerify);
+});
 passport.use(tequila);
 
 var app = express();
