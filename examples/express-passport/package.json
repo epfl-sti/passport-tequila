@@ -2,7 +2,7 @@
   "name": "tequilajs-express-passport-example",
   "version": "0.0.0",
   "dependencies": {
-    "express": "2.x.x",
+    "express": ">= 4.0.0",
     "ejs": ">= 0.0.0",
     "passport": ">= 0.0.0",
     "passport-tequila": ">= 0.1.0",
