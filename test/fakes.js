@@ -62,7 +62,7 @@ TequilaServer.prototype.start = function(done) {
 };
 
 function respondWithDict(res, dict) {
-    res.set("Content-Type", "text/plain; charset=UTF-8\n").send(new Buffer(
+    res.set("Content-Type", "text/plain; charset=UTF-8").send(new Buffer(
         Protocol.dict2txt(dict)));
 }
 
