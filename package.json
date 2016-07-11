@@ -23,6 +23,7 @@
     "mocha": "^2.4.5",
     "morgan": "^1.6.1",
     "pem": "^1.8.3",
+    "q": "^1.4.1",
     "underscore": "^1.8.3"
   },
   "main": "./lib/passport-tequila",
