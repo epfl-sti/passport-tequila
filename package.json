@@ -39,6 +39,7 @@
   "bugs": {
     "url": "http://github.com/epfl-sti/passport-tequila/issues"
   },
+  "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
