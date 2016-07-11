@@ -13,7 +13,8 @@ describe("fakes.TequilaServer", function () {
     });
     it("serves", function (done) {
         Q.nfcall(request, 'https://localhost:' + server.port + "/404")
-            .should.be.fulfilled.then(function(res) {
+            .should.be.fulfilled.then(function(callbackArgs) {
+            var res = callbackArgs[0];
             expect(res.statusCode).to.equal(404);
         }).should.notify(done);
     });
@@ -26,11 +27,12 @@ describe("fakes.TequilaServer", function () {
                 "require=group=somegroup\n" +
                 "allows=category=guest"
             })
-            .should.be.fulfilled.then(function (res) {
-            var body = res.body;
+            .should.be.fulfilled.then(function (callbackArgs) {
+            var res = callbackArgs[0],
+                body = callbackArgs[1];
             expect(res.statusCode).to.equal(200);
             var matched = String(body).match(/key=(.*)/);
-            expect(matched).to.be.Array;
+            expect(matched).to.be.ok;
             var key = matched[1];
             var expectedRequest = {
                 urlaccess: "http://myhost.mydomain/myapp",
