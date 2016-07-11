@@ -32,7 +32,7 @@ describe("fakes.TequilaServer", function () {
                 body = callbackArgs[1];
             expect(res.statusCode).to.equal(200);
             var matched = String(body).match(/key=(.*)/);
-            expect(matched).to.be.ok;
+            expect(matched).to.be.an('Array');
             var key = matched[1];
             var expectedRequest = {
                 urlaccess: "http://myhost.mydomain/myapp",
