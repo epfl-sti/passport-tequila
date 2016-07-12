@@ -1,7 +1,8 @@
 var chai = require('chai'),
     expect = chai.expect,
     Q = require('Q'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    ip = require('ip');
 
 var fakes = require('../fakes'),
     request = fakes.request;
@@ -11,9 +12,19 @@ describe("fakes.TequilaServer", function () {
     before(function(done) {
         server.start(done);
     });
+
     it("serves", function (done) {
         Q.nfcall(request, 'https://localhost:' + server.port + "/404")
             .should.be.fulfilled.then(function(callbackArgs) {
+            var res = callbackArgs[0];
+            expect(res.statusCode).to.equal(404);
+        }).should.notify(done);
+    });
+
+    var localIp = ip.address();
+    it("serves on all interfaces", (! localIp) ? undefined : function (done) {
+        Q.nfcall(request, 'https://' + localIp + ':' + server.port + "/404")
+            .should.be.fulfilled.then(function (callbackArgs) {
             var res = callbackArgs[0];
             expect(res.statusCode).to.equal(404);
         }).should.notify(done);

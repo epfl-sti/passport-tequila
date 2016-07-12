@@ -15,7 +15,12 @@ var https = require("https"),
     express = weakRequire("express"),
     bodyParser = weakRequire("body-parser"),
     request = weakRequire("request"),
-    Protocol = require("../lib/passport-tequila/protocol");
+    os = require("os"),
+    Protocol = require("../lib/passport-tequila/protocol"),
+    pem = weakRequire("pem"),
+    ip = weakRequire("ip"),
+    fs = require("fs"),
+    EventEmitter = require("events").EventEmitter;
 
 var txt2dictBodyParser = function () {
     var textParser = bodyParser.text();
@@ -50,7 +55,7 @@ var TequilaServer = exports.TequilaServer = function() {
 
 TequilaServer.prototype.start = function(done) {
     var self = this;
-    var server = HTTPSServer(self.app);
+    var server = new HTTPSServer(self.app);
     server.listen(self.port || 0, function(error) {
         if (error) {
             done(error);
@@ -80,7 +85,7 @@ TequilaServer.prototype.getOptions = function() {
     return {
         tequila_host: "localhost",
         tequila_port: this.port,
-        agent: new https.Agent({ca: fakeCert})
+        agent: new https.Agent({ca: fakeCACert})
     }
 };
 
@@ -157,58 +162,92 @@ var Response = exports.Response = function() {
 
 // Key and certificate were generated with
 //
-//   openssl req -x509 -nodes -days 3650 -newkey rsa:1024 \
-//        -keyout /dev/stdout -batch -subj "/O=test/CN=localhost"
+//   openssl req -x509 -nodes -days 10000 -newkey rsa:2048 \
+//        -keyout /dev/stdout -batch \
+//        -subj "/O=passport-tequila/CN=passport-tequila test CA"
 //
 
-var fakeCert = exports.certificate =
-    "-----BEGIN CERTIFICATE-----\n" +
-    "MIICFDCCAX2gAwIBAgIJAPk4T3QL6eNUMA0GCSqGSIb3DQEBCwUAMCMxDTALBgNV\n" +
-    "BAoMBHRlc3QxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0xNjAyMTUxNTMyNThaFw0y\n" +
-    "NjAyMTIxNTMyNThaMCMxDTALBgNVBAoMBHRlc3QxEjAQBgNVBAMMCWxvY2FsaG9z\n" +
-    "dDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAtiDnFgt2H+larAOAwQ8drzyc\n" +
-    "mAtbsHkyhEXE28anaZeyACb1MDxpzh4cG+Hy0yggiekORFPmjGsY3weGVTnANJK6\n" +
-    "6FhqrQjrejl1oh0milv550tV+pFyyQ2a8gagbF3efKU1YixBA9nqyWA9uWHj2nLL\n" +
-    "nfd9aKPS7iOqedQZ6UECAwEAAaNQME4wHQYDVR0OBBYEFGdKsgCwRxFBYl068ADv\n" +
-    "UMYPCVsLMB8GA1UdIwQYMBaAFGdKsgCwRxFBYl068ADvUMYPCVsLMAwGA1UdEwQF\n" +
-    "MAMBAf8wDQYJKoZIhvcNAQELBQADgYEAD4ExR63rqegQQ8tWoBjP2ytk+pU9Zfwr\n" +
-    "QpyxGctrbjH8UmU0F9grTpXpmk8lEirb60pvzCyCy9fvjqYjaw72PgKnD/QvG8Xo\n" +
-    "7GJPF2N1gVfSnlGvFTq6QyPXq8fM6kZkCfFj2FbSTDtfzauWCZdGzi84JRB3Oxs7\n" +
-    "KQiZrnTMFcg=\n" +
-    "-----END CERTIFICATE-----\n";
-
-var fakeKey =
-    "-----BEGIN PRIVATE KEY-----\n" +
-    "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALYg5xYLdh/pWqwD\n" +
-    "gMEPHa88nJgLW7B5MoRFxNvGp2mXsgAm9TA8ac4eHBvh8tMoIInpDkRT5oxrGN8H\n" +
-    "hlU5wDSSuuhYaq0I63o5daIdJopb+edLVfqRcskNmvIGoGxd3nylNWIsQQPZ6slg\n" +
-    "Pblh49pyy533fWij0u4jqnnUGelBAgMBAAECgYAhHhiHJKxlHxyyvKxT7ri6Ha5n\n" +
-    "42DX1SH/dWRXhmb4x3HBn1PkYofmyAjadRqflONd0Hgcqpj4nZzXKVoe8zJkzeCZ\n" +
-    "ydivuH3pL/n/nQryvX3XHYcYXRUccoq/cDmHOEV6nBLElVryqXYJMBZdFMWYYevE\n" +
-    "Oqeaim1p4M0od8Z/AQJBAPJQrrwTccBNuwcDbCQfRd5yqVY0AWbL12zOR+9Cfrws\n" +
-    "9D3lthbH9ZRuTxAs0WL7RH26gXBBf5BDxmoEsw9nO1ECQQDAag90HcxY4svwMSEi\n" +
-    "aXdOnuxs/03HsjtiC+3YiHPw3F7Nfhockmzu9qyp6b23ZvXn6q1ULNNxhadSuhex\n" +
-    "MXLxAkEAyIUd5AOPOVzZrXcWkVnTvr5SBUTp+AAtWBvoCUWUjPICeApUwctdHSSf\n" +
-    "hrof1/IofobNQHDjOCXt1qPm7ZM20QJAOydgIN6YWCtBb1JrUV0DJNSO8uN6Ug5l\n" +
-    "Wzs3n/4zRrU5IAvIk0gg3UZQxtvpS10H9IidSOePCbOBQVmctwjwwQJBAPGYg4PL\n" +
-    "Y3Bs0u9IVS6HhVLCTdorgcxDs03czDK819UZmZb7O8jdc5QlJBniLBR/lrHV3IbJ\n" +
-    "y4S/YbSQ7jvaGxU=\n" +
-    "-----END PRIVATE KEY-----\n";
+var fakeCACert = fs.readFileSync(__dirname + "/ca/ca.crt"),
+    fakeCAKey = fs.readFileSync(__dirname + "/ca/ca.key");
 
 /**
  * A fake HTTP/S server.
+ * @constructor
  */
 var HTTPSServer = exports.HTTPSServer = function(handler) {
-    return https.createServer({
-        cert: fakeCert,
-        key: fakeKey
-    }, handler);
+    var server;
+
+    var keysReady = new EventEmitter(),
+        keys;
+    
+    getNextSerial(function(err, serial) {
+        if (err) return handler(err);
+        console.log("Creating certificate with serial "  + serial);
+        pem.createCertificate(
+            {days:365,
+             serviceKey: fakeCAKey,
+             serviceCertificate: fakeCACert,
+             serial: serial,
+             organization: "passport-tequila",
+             commonName: "fake Passport-Tequila server",
+             altNames: getAllAltNames()             
+            },
+            function(err, data) {
+                if (err) return handler(err);
+                keys = data;
+                console.log("ready");
+                keysReady.emit("ready");
+            });
+    });
+
+    var server;
+    return {
+        listen: function(port, cb) {
+            keysReady.once("ready", function() {
+                // console.log(keys.certificate + "\n" + keys.clientKey);
+                server = https.createServer({
+                    cert: keys.certificate,
+                    key: keys.clientKey
+                }, handler);
+                server.listen(port, cb);
+            });
+            if (keys) keysReady.emit("ready");
+        },
+        address: function() {
+          return server.address();
+        }
+    };
 };
 
-function requestWithFakeCert(params) {
+function getAllAltNames() {
+  var interfaces = os.networkInterfaces(),
+    altNames = ["localhost"];
+  function addAltName(altName) {
+    if (altNames.indexOf(altName) === -1) {
+      altNames.push(altName);
+    }
+  }
+  for (var ifname in interfaces) {
+    interfaces[ifname].forEach(function(address) {
+      addAltName(address.address);
+    });
+  }
+  return altNames;
+}
+
+function requestWithFakeCA(params) {
   if (! params.agentOptions) params.agentOptions = {};
-  params.agentOptions.ca = fakeCert;
+  params.agentOptions.ca = fakeCACert;
   return request(params, params.callback);
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+/* Firefox hates certs with the same serial from the same CA. */
+function getNextSerial(cb) {
+    cb(null, getRandomInt(1, Math.pow(2, 32)));
 }
 
 /**
@@ -216,18 +255,24 @@ function requestWithFakeCert(params) {
  */
 exports.request = function(uri, options, callback) {
   var params = request.initParams(uri, options, callback);
-  return requestWithFakeCert(params);
+  return requestWithFakeCA(params);
 };
 
 exports.request.post = function(uri, options, callback) {
   var params = request.initParams(uri, options, callback);
   params.method = "post";
-  return requestWithFakeCert(params);
+  return requestWithFakeCA(params);
 };
 
 exports.request.get = function(uri, options, callback) {
   var params = request.initParams(uri, options, callback);
   params.method = "get";
-  return requestWithFakeCert(params);
+  return requestWithFakeCA(params);
 };
 
+/**
+ * @returns {string} The certificate of the CA that clients must trust
+ */
+exports.getCACert = function() {
+    return fakeCACert;
+};
