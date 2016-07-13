@@ -175,8 +175,6 @@ var fakeCACert = fs.readFileSync(__dirname + "/ca/ca.crt"),
  * @constructor
  */
 var HTTPSServer = exports.HTTPSServer = function(handler) {
-    var server;
-
     var keysReady = new EventEmitter(),
         keys;
     
@@ -185,7 +183,8 @@ var HTTPSServer = exports.HTTPSServer = function(handler) {
         getAllAltNames(function (err, altNames) {
             if (err) return handler(err);
             pem.createCertificate(
-                {days:365,
+                {
+                    days:365,
                     serviceKey: fakeCAKey,
                     serviceCertificate: fakeCACert,
                     serial: serial,
@@ -221,19 +220,24 @@ var HTTPSServer = exports.HTTPSServer = function(handler) {
 };
 
 function getAllAltNames(done) {
-  var interfaces = os.networkInterfaces(),
-    altNames = ["localhost"];
-  function addAltName(altName) {
-    if (altNames.indexOf(altName) === -1) {
-      altNames.push(altName);
+    var interfaces = os.networkInterfaces(),
+        altNames = ["localhost", os.hostname()];
+    function addAltName(altName) {
+        if (altNames.indexOf(altName) === -1) {
+            altNames.push(altName);
+        }
     }
-  }
-  for (var ifname in interfaces) {
-    interfaces[ifname].forEach(function(address) {
-      addAltName(address.address);
+    for (var ifname in interfaces) {
+        interfaces[ifname].forEach(function(address) {
+            addAltName(address.address);
+        });
+    }
+    var fqdn = require("fqdn");
+    fqdn(function(err, res) {
+        if (err) return done(err);
+        altNames.push(res);
+        done(null, altNames);
     });
-  }
-  done(null, altNames);
 }
 
 function requestWithFakeCA(params) {
