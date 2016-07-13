@@ -182,22 +182,23 @@ var HTTPSServer = exports.HTTPSServer = function(handler) {
     
     getNextSerial(function(err, serial) {
         if (err) return handler(err);
-        console.log("Creating certificate with serial "  + serial);
-        pem.createCertificate(
-            {days:365,
-             serviceKey: fakeCAKey,
-             serviceCertificate: fakeCACert,
-             serial: serial,
-             organization: "passport-tequila",
-             commonName: "fake Passport-Tequila server",
-             altNames: getAllAltNames()             
-            },
-            function(err, data) {
-                if (err) return handler(err);
-                keys = data;
-                console.log("ready");
-                keysReady.emit("ready");
-            });
+        getAllAltNames(function (err, altNames) {
+            if (err) return handler(err);
+            pem.createCertificate(
+                {days:365,
+                    serviceKey: fakeCAKey,
+                    serviceCertificate: fakeCACert,
+                    serial: serial,
+                    organization: "passport-tequila",
+                    commonName: "fake Passport-Tequila server",
+                    altNames: altNames
+                },
+                function(err, data) {
+                    if (err) return handler(err);
+                    keys = data;
+                    keysReady.emit("ready");
+                });
+        });
     });
 
     var server;
@@ -219,7 +220,7 @@ var HTTPSServer = exports.HTTPSServer = function(handler) {
     };
 };
 
-function getAllAltNames() {
+function getAllAltNames(done) {
   var interfaces = os.networkInterfaces(),
     altNames = ["localhost"];
   function addAltName(altName) {
@@ -232,7 +233,7 @@ function getAllAltNames() {
       addAltName(address.address);
     });
   }
-  return altNames;
+  done(null, altNames);
 }
 
 function requestWithFakeCA(params) {
